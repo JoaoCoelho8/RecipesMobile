@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  postgres:
+    build:
+      context: '.'
+      dockerfile: './postgres/Dockerfile'
+    environment: # variaveis de ambiente
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: recipes
+    ports:
+      - '5432-5432' #porta do postgres
+    networks:
+      - 'recipes' #rede de ligação do docker
+    volumes:
+      - 'postgresData' # volume para a base de dados
+      #- './postgres:/docker-entrypoint-initdb.d'
+  go: # imagem para go
+    build:
+      context: '.'
+      dockerfile: './go/Dockerfile'
+    depends_on:
+     - 'postgres'
+    ports:
+      - '8000:8000'
+    networks:
+      - 'recipes'
+    volumes:
+      - './go/app:/go/src/github.com/app/restapi'
+    links:
+      - postgres
+volumes:
+  postgresData: {}
+
+networks: # cria network
+  recipes:
